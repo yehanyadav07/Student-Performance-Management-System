@@ -83,7 +83,7 @@ async function loadDashboard() {
 
     // Supports either an object or an array response.
     const stats = Array.isArray(data) ? data[0] || {} : data;
-
+    
     setText("total-students",
       stats.totalStudents ?? stats.total_students ?? 0);
 
@@ -103,7 +103,7 @@ async function loadDashboard() {
 
     await loadSubjectChart();
     await loadRecentResults();
-
+    loadResultPieChart();
   } catch (error) {
     console.error("Dashboard error:", error);
     showError("Could not load dashboard: " + error.message);
@@ -457,6 +457,92 @@ async function loadResults() {
     showError("Could not load results: " + error.message);
   }
 }
+
+let resultPieChart = null;
+
+async function loadResultPieChart() {
+    const canvas = document.getElementById("result-pie-chart");
+
+    if (!canvas || typeof Chart === "undefined") {
+        return;
+    }
+
+    try {
+        const response = await fetch("/api/results");
+
+        if (!response.ok) {
+            throw new Error("Unable to load results");
+        }
+
+        const results = await response.json();
+
+        let passCount = 0;
+        let failCount = 0;
+
+        results.forEach((student) => {
+            const result = String(student.result || "").toUpperCase();
+
+            if (result === "PASS") {
+                passCount++;
+            } else if (result === "FAIL") {
+                failCount++;
+            }
+        });
+
+        if (resultPieChart) {
+            resultPieChart.destroy();
+        }
+
+        resultPieChart = new Chart(canvas, {
+            type: "pie",
+            data: {
+                labels: ["Pass", "Fail"],
+                datasets: [{
+                    data: [passCount, failCount],
+                    backgroundColor: ["#10b981", "#f05266"],
+                    borderColor: ["#ffffff", "#ffffff"],
+                    borderWidth: 4,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: "bottom",
+                        labels: {
+                            usePointStyle: true,
+                            padding: 22,
+                            font: {
+                                size: 12,
+                                family: "Segoe UI"
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                const total = context.dataset.data
+                                    .reduce((sum, value) => sum + value, 0);
+
+                                const value = context.raw;
+                                const percentage = total
+                                    ? ((value / total) * 100).toFixed(1)
+                                    : "0.0";
+
+                                return `${context.label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error("Pie chart error:", error);
+    }
+}
+
 
 // -------------------------------
 // INITIALIZE APP
