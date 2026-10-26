@@ -1,0 +1,299 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Performance System</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <aside class="sidebar">
+        <h2>EduTrack<span>.</span></h2>
+        <p class="side-label">MAIN MENU</p>
+
+        <button class="nav-btn active" data-page="dashboard">▦ Dashboard</button>
+        <button class="nav-btn" data-page="students">♙ Students</button>
+        <button class="nav-btn" data-page="marks">✎ Marks Management</button>
+        <button class="nav-btn" data-page="results">▤ Results</button>
+
+        <div class="sidebar-bottom">
+            Student Performance<br>
+            Analysis System
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div>
+                <p class="muted">ACADEMIC MANAGEMENT</p>
+                <h1 id="page-title">Dashboard</h1>
+            </div>
+            <div class="profile">Administrator</div>
+        </header>
+
+        <!-- DASHBOARD PAGE -->
+        <section id="dashboard-page" class="page">
+            <div class="welcome">
+                <div>
+                    <p class="muted light">STUDENT PERFORMANCE ANALYSIS</p>
+                    <h2>Welcome to EduTrack 👋</h2>
+                    <p>Monitor student results and academic performance.</p>
+                </div>
+                <div class="welcome-icon">✦</div>
+            </div>
+
+            <div class="stats">
+                <article class="stat-card">
+                    <p>Total Students</p>
+                    <h2 id="total-students">—</h2>
+                    <span>Registered students</span>
+                </article>
+
+                <article class="stat-card">
+                    <p>Average Percentage</p>
+                    <h2 id="average-percentage">—</h2>
+                    <span>Across recorded results</span>
+                </article>
+
+                <article class="stat-card">
+                    <p>Pass Rate</p>
+                    <h2 id="pass-rate">—</h2>
+                    <span>Students passing all subjects</span>
+                </article>
+
+                <article class="stat-card">
+                    <p>Result Records</p>
+                    <h2 id="total-results">—</h2>
+                    <span>Exam results generated</span>
+                </article>
+            </div>
+
+            <div class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Academic Performance</h3>
+                        <p class="muted">Average marks by subject</p>
+                    </div>
+                </div>
+
+                <div class="chart-wrap">
+                    <canvas id="subject-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Recent Student Results</h3>
+                        <p class="muted">Performance summary from your database</p>
+                    </div>
+                    <button class="small-btn" type="button" onclick="showPage('results')">
+                        View all →
+                    </button>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Roll No.</th>
+                                <th>Student</th>
+                                <th>Exam</th>
+                                <th>Percentage</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-results"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- STUDENTS PAGE -->
+        <section id="students-page" class="page hidden">
+            <div class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Student Management</h3>
+                        <p class="muted">Register and manage students</p>
+                    </div>
+
+                    <button class="primary-btn" type="button" onclick="toggleForm()">
+                        + Add Student
+                    </button>
+                </div>
+
+                <form id="student-form" class="student-form hidden">
+                    <div class="form-grid">
+                        <label>Roll Number *
+                            <input name="roll_no" required>
+                        </label>
+
+                        <label>Full Name *
+                            <input name="name" required>
+                        </label>
+
+                        <label>Email
+                            <input name="email" type="email">
+                        </label>
+
+                        <label>Department
+                            <input name="department" value="CSE">
+                        </label>
+
+                        <label>Semester
+                            <input name="semester" type="number" min="1" max="12" value="3">
+                        </label>
+                    </div>
+
+                    <button class="primary-btn" type="submit">Save Student</button>
+                    <button class="small-btn" type="button" onclick="toggleForm()">Cancel</button>
+                    <p id="form-message"></p>
+                </form>
+
+                <input
+                    id="student-search"
+                    class="search"
+                    placeholder="Search by name or roll number..."
+                >
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Roll No.</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Department</th>
+                                <th>Semester</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="students-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- MARKS MANAGEMENT PAGE -->
+        <section id="marks-page" class="page hidden">
+            <div class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Marks Management</h3>
+                        <p class="muted">Record marks for students, subjects and examinations</p>
+                    </div>
+                </div>
+
+                <form id="marks-form" class="student-form">
+                    <div class="form-grid">
+                        <label>Student *
+                            <select id="marks-student" required>
+                                <option value="">Select student</option>
+                            </select>
+                        </label>
+
+                        <label>Subject *
+                            <select id="marks-subject" required>
+                                <option value="">Select subject</option>
+                            </select>
+                        </label>
+
+                        <label>Examination *
+                            <select id="marks-exam" required>
+                                <option value="">Select exam</option>
+                            </select>
+                        </label>
+
+                        <label>Marks Obtained *
+                            <input
+                                id="marks-obtained"
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                required
+                                placeholder="Enter marks"
+                            >
+                            <small id="marks-limit"></small>
+                        </label>
+                    </div>
+
+                    <button class="primary-btn" type="submit">Save Marks</button>
+                    <button class="small-btn" type="reset">Clear Form</button>
+                </form>
+            </div>
+
+            <div class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Saved Marks</h3>
+                        <p class="muted">Marks recorded in the database</p>
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Roll No.</th>
+                                <th>Student</th>
+                                <th>Subject</th>
+                                <th>Exam</th>
+                                <th>Marks</th>
+                                <th>Maximum</th>
+                            </tr>
+                        </thead>
+                        <tbody id="marks-table">
+                            <tr>
+                                <td colspan="6">Loading marks...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- RESULTS PAGE -->
+        <section id="results-page" class="page hidden">
+            <div class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Student Results</h3>
+                        <p class="muted">Calculated from recorded subject marks</p>
+                    </div>
+                </div>
+
+                <input
+                    id="result-search"
+                    class="search"
+                    placeholder="Search by name or roll number..."
+                >
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Roll No.</th>
+                                <th>Student</th>
+                                <th>Exam</th>
+                                <th>Total Marks</th>
+                                <th>Percentage</th>
+                                <th>Result</th>
+                            </tr>
+                        </thead>
+                        <tbody id="results-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            EduTrack · Student Performance Analysis and Result Management System
+        </footer>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
