@@ -1,299 +1,469 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Performance System</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduTrack | Student Performance System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+
+  <!-- ================= LOGIN ================= -->
+  <div id="login-screen" class="login-screen hidden">
+    <form id="login-form" class="login-card">
+      <div class="brand brand-dark"><span class="brand-mark">E</span>EduTrack</div>
+      <h1>Sign in</h1>
+      <p class="muted">Use your administrator account to open the dashboard.</p>
+
+      <label>Username
+        <input id="login-user" autocomplete="username" required>
+      </label>
+      <label>Password
+        <input id="login-pass" type="password" autocomplete="current-password" required>
+      </label>
+
+      <p id="login-error" class="form-error" role="alert"></p>
+      <button class="btn btn-primary btn-block" type="submit">Sign in</button>
+    </form>
+  </div>
+
+  <!-- ================= APP ================= -->
+  <div id="app" class="app hidden">
+
     <aside class="sidebar">
-        <h2>EduTrack<span>.</span></h2>
-        <p class="side-label">MAIN MENU</p>
+      <div class="brand"><span class="brand-mark">E</span>EduTrack</div>
 
-        <button class="nav-btn active" data-page="dashboard">▦ Dashboard</button>
-        <button class="nav-btn" data-page="students">♙ Students</button>
-        <button class="nav-btn" data-page="marks">✎ Marks Management</button>
-        <button class="nav-btn" data-page="results">▤ Results</button>
+      <nav class="nav">
+        <button class="nav-btn active" data-page="dashboard">
+          <span class="nav-icon">▦</span>Dashboard
+        </button>
+        <button class="nav-btn" data-page="students">
+          <span class="nav-icon">☻</span>Students
+        </button>
+        <button class="nav-btn" data-page="marks">
+          <span class="nav-icon">✎</span>Marks management
+        </button>
+        <button class="nav-btn" data-page="setup">
+          <span class="nav-icon">⚙</span>Subjects and exams
+        </button>
+        <button class="nav-btn" data-page="results">
+          <span class="nav-icon">▤</span>Results
+        </button>
+        <button class="nav-btn" data-page="report">
+          <span class="nav-icon">▣</span>Report card
+        </button>
+        <button class="nav-btn" data-page="analytics">
+          <span class="nav-icon">◔</span>Analytics
+        </button>
+      </nav>
 
-        <div class="sidebar-bottom">
-            Student Performance<br>
-            Analysis System
-        </div>
+      <div class="sidebar-foot">
+        Student Performance<br>Analysis and Result Management
+      </div>
     </aside>
 
     <main class="main">
-        <header class="topbar">
+      <header class="topbar">
+        <div>
+          <p class="muted" id="page-sub">Academic overview</p>
+          <h1 id="page-title">Dashboard</h1>
+        </div>
+        <div class="topbar-right">
+          <span class="user-chip"><span class="avatar" id="user-avatar">A</span><span id="user-name">admin</span></span>
+          <button class="btn btn-ghost" id="logout-btn" type="button">Log out</button>
+        </div>
+      </header>
+
+      <!-- ===== DASHBOARD ===== -->
+      <section id="dashboard-page" class="page">
+        <div class="stats">
+          <article class="stat">
+            <p>Total students</p>
+            <h2 id="total-students">0</h2>
+            <span>Registered in the system</span>
+          </article>
+          <article class="stat">
+            <p>Average percentage</p>
+            <h2 id="average-percentage">0%</h2>
+            <span>Across all recorded results</span>
+          </article>
+          <article class="stat">
+            <p>Pass rate</p>
+            <h2 id="pass-rate">0%</h2>
+            <span>Passed every subject</span>
+          </article>
+          <article class="stat">
+            <p>Result records</p>
+            <h2 id="total-results">0</h2>
+            <span>Exam results generated</span>
+          </article>
+        </div>
+
+        <div class="charts-grid">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <h3>Average marks by subject</h3>
+                <p class="muted">How the whole class is doing in each subject</p>
+              </div>
+            </div>
+            <div class="chart-box"><canvas id="subject-chart"></canvas></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <h3>Pass and fail</h3>
+                <p class="muted">Share of passing results</p>
+              </div>
+            </div>
+            <div class="chart-box"><canvas id="result-pie-chart"></canvas></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
             <div>
-                <p class="muted">ACADEMIC MANAGEMENT</p>
-                <h1 id="page-title">Dashboard</h1>
+              <h3>Top results</h3>
+              <p class="muted">Highest percentages first</p>
             </div>
-            <div class="profile">Administrator</div>
-        </header>
+            <button class="btn btn-ghost" type="button" data-goto="results">View all results</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Roll no.</th><th>Student</th><th>Exam</th><th>Percentage</th><th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="recent-results"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
 
-        <!-- DASHBOARD PAGE -->
-        <section id="dashboard-page" class="page">
-            <div class="welcome">
-                <div>
-                    <p class="muted light">STUDENT PERFORMANCE ANALYSIS</p>
-                    <h2>Welcome to EduTrack 👋</h2>
-                    <p>Monitor student results and academic performance.</p>
-                </div>
-                <div class="welcome-icon">✦</div>
+      <!-- ===== STUDENTS ===== -->
+      <section id="students-page" class="page hidden">
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <h3>Student records</h3>
+              <p class="muted" id="students-count">Register and manage students</p>
             </div>
-            
-            <div class="stats">
-                <article class="stat-card">
-                    <p>Total Students</p>
-                    <h2 id="total-students">—</h2>
-                    <span>Registered students</span>
-                </article>
-
-                <article class="stat-card">
-                    <p>Average Percentage</p>
-                    <h2 id="average-percentage">—</h2>
-                    <span>Across recorded results</span>
-                </article>
-
-                <article class="stat-card">
-                    <p>Pass Rate</p>
-                    <h2 id="pass-rate">—</h2>
-                    <span>Students passing all subjects</span>
-                </article>
-
-                <article class="stat-card">
-                    <p>Result Records</p>
-                    <h2 id="total-results">—</h2>
-                    <span>Exam results generated</span>
-                </article>
+            <div class="head-actions">
+              <button class="btn btn-ghost" id="export-students" type="button">Export CSV</button>
+              <button class="btn btn-primary" id="add-student-btn" type="button">+ Add student</button>
             </div>
+          </div>
 
-            <div class="panel">
-                <div class="panel-heading">
-                    <div>
-                        <h3>Academic Performance</h3>
-                        <p class="muted">Average marks by subject</p>
-                    </div>
-                </div>
+          <input id="student-search" class="search" placeholder="Search by name, roll number, email or department">
 
-                <div class="chart-wrap">
-                    <canvas id="subject-chart"></canvas>
-                </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Roll no.</th><th>Name</th><th>Email</th><th>Department</th><th>Semester</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="students-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== MARKS ===== -->
+      <section id="marks-page" class="page hidden">
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <h3>Enter marks</h3>
+              <p class="muted">Saving marks again for the same student, subject and exam updates them</p>
             </div>
+          </div>
 
-            <div class="panel">
-                <div class="panel-heading">
-                    <div>
-                        <h3>Recent Student Results</h3>
-                        <p class="muted">Performance summary from your database</p>
-                    </div>
-                    <button class="small-btn" type="button" onclick="showPage('results')">
-                        View all →
-                    </button>
-                </div>
-
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Roll No.</th>
-                                <th>Student</th>
-                                <th>Exam</th>
-                                <th>Percentage</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="recent-results"></tbody>
-                    </table>
-                </div>
+          <form id="marks-form">
+            <div class="form-grid">
+              <label>Student
+                <select id="marks-student" required><option value="">Select student</option></select>
+              </label>
+              <label>Subject
+                <select id="marks-subject" required><option value="">Select subject</option></select>
+              </label>
+              <label>Examination
+                <select id="marks-exam" required><option value="">Select exam</option></select>
+              </label>
+              <label>Marks obtained
+                <input id="marks-obtained" type="number" min="0" step="0.01" placeholder="Enter marks" required>
+                <small id="marks-limit"></small>
+              </label>
             </div>
-        </section>
-
-        <!-- STUDENTS PAGE -->
-        <section id="students-page" class="page hidden">
-            <div class="panel">
-                <div class="panel-heading">
-                    <div>
-                        <h3>Student Management</h3>
-                        <p class="muted">Register and manage students</p>
-                    </div>
-
-                    <button class="primary-btn" type="button" onclick="toggleForm()">
-                        + Add Student
-                    </button>
-                </div>
-
-                <form id="student-form" class="student-form hidden">
-                    <div class="form-grid">
-                        <label>Roll Number *
-                            <input name="roll_no" required>
-                        </label>
-
-                        <label>Full Name *
-                            <input name="name" required>
-                        </label>
-
-                        <label>Email
-                            <input name="email" type="email">
-                        </label>
-
-                        <label>Department
-                            <input name="department" value="CSE">
-                        </label>
-
-                        <label>Semester
-                            <input name="semester" type="number" min="1" max="12" value="3">
-                        </label>
-                    </div>
-
-                    <button class="primary-btn" type="submit">Save Student</button>
-                    <button class="small-btn" type="button" onclick="toggleForm()">Cancel</button>
-                    <p id="form-message"></p>
-                </form>
-
-                <input
-                    id="student-search"
-                    class="search"
-                    placeholder="Search by name or roll number..."
-                >
-
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Roll No.</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Department</th>
-                                <th>Semester</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="students-table"></tbody>
-                    </table>
-                </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">Save marks</button>
+              <button class="btn btn-ghost" type="reset" id="marks-reset">Clear form</button>
             </div>
-        </section>
+          </form>
+        </div>
 
-        <!-- MARKS MANAGEMENT PAGE -->
-        <section id="marks-page" class="page hidden">
-            <div class="panel">
-                <div class="panel-heading">
-                    <div>
-                        <h3>Marks Management</h3>
-                        <p class="muted">Record marks for students, subjects and examinations</p>
-                    </div>
-                </div>
-
-                <form id="marks-form" class="student-form">
-                    <div class="form-grid">
-                        <label>Student *
-                            <select id="marks-student" required>
-                                <option value="">Select student</option>
-                            </select>
-                        </label>
-
-                        <label>Subject *
-                            <select id="marks-subject" required>
-                                <option value="">Select subject</option>
-                            </select>
-                        </label>
-
-                        <label>Examination *
-                            <select id="marks-exam" required>
-                                <option value="">Select exam</option>
-                            </select>
-                        </label>
-
-                        <label>Marks Obtained *
-                            <input
-                                id="marks-obtained"
-                                type="number"
-                                min="0"
-                                step="0.01"
-                                required
-                                placeholder="Enter marks"
-                            >
-                            <small id="marks-limit"></small>
-                        </label>
-                    </div>
-
-                    <button class="primary-btn" type="submit">Save Marks</button>
-                    <button class="small-btn" type="reset">Clear Form</button>
-                </form>
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <h3>Saved marks</h3>
+              <p class="muted">Every mark recorded in the database</p>
             </div>
+            <button class="btn btn-ghost" id="export-marks" type="button">Export CSV</button>
+          </div>
+          <input id="marks-search" class="search" placeholder="Search by student, roll number or subject">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Roll no.</th><th>Student</th><th>Subject</th><th>Exam</th><th>Marks</th><th>Maximum</th>
+                </tr>
+              </thead>
+              <tbody id="marks-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
 
-            <div class="panel">
-                <div class="panel-heading">
-                    <div>
-                        <h3>Saved Marks</h3>
-                        <p class="muted">Marks recorded in the database</p>
-                    </div>
-                </div>
-
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Roll No.</th>
-                                <th>Student</th>
-                                <th>Subject</th>
-                                <th>Exam</th>
-                                <th>Marks</th>
-                                <th>Maximum</th>
-                            </tr>
-                        </thead>
-                        <tbody id="marks-table">
-                            <tr>
-                                <td colspan="6">Loading marks...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+      <!-- ===== RESULTS ===== -->
+      <section id="results-page" class="page hidden">
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <h3>Student results</h3>
+              <p class="muted" id="results-count">Calculated from recorded subject marks</p>
             </div>
-        </section>
+            <button class="btn btn-ghost" id="export-results" type="button">Export CSV</button>
+          </div>
 
-        <!-- RESULTS PAGE -->
-        <section id="results-page" class="page hidden">
-            <div class="panel">
-                <div class="panel-heading">
-                    <div>
-                        <h3>Student Results</h3>
-                        <p class="muted">Calculated from recorded subject marks</p>
-                    </div>
-                </div>
+          <div class="filters">
+            <input id="result-search" class="search" placeholder="Search by name or roll number">
+            <select id="result-filter" class="filter-select">
+              <option value="">All results</option>
+              <option value="PASS">Pass only</option>
+              <option value="FAIL">Fail only</option>
+            </select>
+          </div>
 
-                <input
-                    id="result-search"
-                    class="search"
-                    placeholder="Search by name or roll number..."
-                >
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Roll no.</th><th>Student</th><th>Exam</th><th>Total marks</th>
+                  <th>Maximum marks</th><th>Percentage</th><th>Grade</th><th>Status</th><th>Report</th>
+                </tr>
+              </thead>
+              <tbody id="results-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
 
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Roll No.</th>
-                                <th>Student</th>
-                                <th>Exam</th>
-                                <th>Total Marks</th>
-                                <th>Percentage</th>
-                                <th>Result</th>
-                            </tr>
-                        </thead>
-                        <tbody id="results-table"></tbody>
-                    </table>
-                </div>
+      <!-- ===== SUBJECTS AND EXAMS ===== -->
+      <section id="setup-page" class="page hidden">
+        <div class="two-col">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <h3>Subjects</h3>
+                <p class="muted">Add subjects and set their maximum marks</p>
+              </div>
             </div>
-        </section>
+            <form id="subject-form" class="inline-form">
+              <input type="hidden" id="subject_id">
+              <label>Subject name
+                <input id="subject_name" required>
+              </label>
+              <label>Maximum marks
+                <input id="subject_max" type="number" min="1" step="1" value="100" required>
+              </label>
+              <div class="form-actions">
+                <button class="btn btn-primary" type="submit" id="subject-save">Add subject</button>
+                <button class="btn btn-ghost hidden" type="button" id="subject-cancel">Cancel edit</button>
+              </div>
+            </form>
+            <p id="subject-error" class="form-error" role="alert"></p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Subject</th><th>Maximum marks</th><th>Actions</th></tr></thead>
+                <tbody id="subjects-table"></tbody>
+              </table>
+            </div>
+          </div>
 
-        <footer>
-            EduTrack · Student Performance Analysis and Result Management System
-        </footer>
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <h3>Examinations</h3>
+                <p class="muted">Add exams such as Mid Semester or End Semester</p>
+              </div>
+            </div>
+            <form id="exam-form" class="inline-form">
+              <input type="hidden" id="exam_id">
+              <label>Exam name
+                <input id="exam_name" required>
+              </label>
+              <label>Exam date
+                <input id="exam_date" type="date" required>
+              </label>
+              <div class="form-actions">
+                <button class="btn btn-primary" type="submit" id="exam-save">Add exam</button>
+                <button class="btn btn-ghost hidden" type="button" id="exam-cancel">Cancel edit</button>
+              </div>
+            </form>
+            <p id="exam-error" class="form-error" role="alert"></p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Exam</th><th>Date</th><th>Actions</th></tr></thead>
+                <tbody id="exams-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== REPORT CARD ===== -->
+      <section id="report-page" class="page hidden">
+        <div class="panel no-print">
+          <div class="panel-head">
+            <div>
+              <h3>Report card</h3>
+              <p class="muted">Choose a student and an exam to see the full report</p>
+            </div>
+          </div>
+          <div class="form-grid">
+            <label>Student
+              <select id="report-student"><option value="">Select student</option></select>
+            </label>
+            <label>Examination
+              <select id="report-exam"><option value="">Select exam</option></select>
+            </label>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" type="button" id="report-view">View report card</button>
+            <button class="btn btn-ghost" type="button" id="report-print">Print</button>
+          </div>
+        </div>
+        <div id="report-card" class="panel report hidden"></div>
+      </section>
+
+      <!-- ===== ANALYTICS ===== -->
+      <section id="analytics-page" class="page hidden">
+        <div class="charts-grid equal">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <h3>Department performance</h3>
+                <p class="muted">Average percentage in each department</p>
+              </div>
+            </div>
+            <div class="chart-box"><canvas id="dept-chart"></canvas></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <h3>Grade distribution</h3>
+                <p class="muted">How many results fall in each grade</p>
+              </div>
+            </div>
+            <div class="chart-box"><canvas id="grade-chart"></canvas></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <h3>Top performers</h3>
+              <p class="muted">Highest percentages, with rank inside each exam</p>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Rank</th><th>Roll no.</th><th>Student</th><th>Exam</th><th>Percentage</th></tr></thead>
+              <tbody id="toppers-table"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <h3>Students who need support</h3>
+              <p class="muted">Students who scored below 40 in at least one subject</p>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Roll no.</th><th>Student</th><th>Exam</th><th>Subjects failed</th><th>Count</th></tr></thead>
+              <tbody id="risk-table"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <h3>Subject difficulty</h3>
+              <p class="muted">Hardest subjects first, based on pass percentage</p>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Subject</th><th>Average</th><th>Highest</th><th>Lowest</th><th>Pass percentage</th></tr></thead>
+              <tbody id="subject-stats-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <footer>EduTrack, Student Performance Analysis and Result Management System</footer>
     </main>
+  </div>
 
-    <script src="app.js"></script>
+  <!-- ================= ADD / EDIT STUDENT ================= -->
+  <div id="student-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <form id="student-form" class="modal-card">
+      <div class="panel-head">
+        <h3 id="modal-title">Add student</h3>
+        <button class="icon-close" type="button" id="modal-close" aria-label="Close">×</button>
+      </div>
+
+      <input type="hidden" id="student_id">
+
+      <div class="form-grid">
+        <label>Roll number *
+          <input id="roll_no" name="roll_no" required>
+        </label>
+        <label>Full name *
+          <input id="name" name="name" required>
+        </label>
+        <label>Email
+          <input id="email" name="email" type="email">
+        </label>
+        <label>Department
+          <input id="department" name="department" value="CSE">
+        </label>
+        <label>Semester
+          <input id="semester" name="semester" type="number" min="1" max="12" value="3">
+        </label>
+      </div>
+
+      <p id="form-message" class="form-error" role="alert"></p>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit" id="save-student-btn">Save student</button>
+        <button class="btn btn-ghost" type="button" id="modal-cancel">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <script src="app.js"></script>
 </body>
 </html>
