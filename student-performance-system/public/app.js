@@ -10,7 +10,7 @@ let marksOptions = null;
 let subjectChart = null;
 let passChart = null;
 
-/* ---------------- HELPERS ---------------- */
+/* ---------------- HELPERS  helpers helpers---------------- */
 
 // Makes text safe to place inside HTML
 function esc(value) {
